@@ -13,13 +13,24 @@ namespace telegram_bot_janus {
 			} else {
 				Console.WriteLine("Please enter your root database password:");
 				string dBRootPw = Console.ReadLine();
+				Console.WriteLine("Enter your database server address now (or leave empty for 127.0.0.1):");
+				string dBServerAdress = Console.ReadLine();
+				if (string.IsNullOrEmpty(dBServerAdress)) {
+					dBServerAdress = "127.0.0.1";
+				}
 				try {
 					MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder {
+						Server = dBServerAdress,
 						UserID = "root",
 						Password = dBRootPw
 					};
 					MySqlConnection connection = new MySqlConnection(builder.GetConnectionString(true));
-					connection.BeginTransaction();
+					try {
+						connection.Open();
+					} catch (MySqlException ex) {
+						Console.WriteLine("An error occured with the database, try again?\nException: \n\n" + ex.ToString());
+						return;
+					}
 					MySqlCommand command = connection.CreateCommand();
 					command.CommandText = "";
 					/*
